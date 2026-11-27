@@ -1,11 +1,11 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { CircleHelp, FlaskConical, History, Home, Menu, Search, UserRound, X } from "lucide-react";
+import { CircleHelp, FlaskConical, History, Home, Menu, PersonStanding, Search, UserRound, X } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 
 const nav = [
   ["Inicio", "/", Home], ["Buscar", "/buscar", Search],
-  ["Búsqueda fonológica", "/busqueda-fonologica", FlaskConical], ["Historial", "/historial", History],
+  ["Búsqueda fonológica", "/busqueda-fonologica", FlaskConical], ["Avatar", "/avatar", PersonStanding], ["Historial", "/historial", History],
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
