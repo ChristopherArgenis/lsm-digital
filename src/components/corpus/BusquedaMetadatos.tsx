@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import {
+  ArrowLeft,
   ArrowRight,
   Hand,
   HandHelping,
@@ -34,14 +35,14 @@ const CAMPOS: { key: CampoMetadatos; label: string; icon: typeof Hand }[] = [
   { key: "cm_base", label: "Forma de la mano de apoyo", icon: HandHelping },
   { key: "ubicacion_base", label: "Lugar de la mano de apoyo", icon: MapPinned },
 ];
-const PAGINA = 24;
+const PAGINA = 12;
 
 export function BusquedaMetadatosView() {
   const [opciones, setOpciones] = useState<OpcionesMetadatos | null>(null);
   const [fotos, setFotos] = useState<Record<string, string>>({});
   const [criterios, setCriterios] = useState<Partial<Record<CampoMetadatos, string>>>({});
   const [resultados, setResultados] = useState<SenaResumen[] | null>(null);
-  const [mostrar, setMostrar] = useState(PAGINA);
+  const [mostrar, setMostrar] = useState(0);
   const [cargando, setCargando] = useState(false);
   const [sinApi, setSinApi] = useState(false);
 
@@ -61,7 +62,7 @@ export function BusquedaMetadatosView() {
       .buscarMetadatos(criterios)
       .then((r) => {
         setResultados(r);
-        setMostrar(PAGINA);
+        setMostrar(0);
         setSinApi(false);
       })
       .catch(() => setSinApi(true))
@@ -188,19 +189,16 @@ export function BusquedaMetadatosView() {
             ) : (
               <>
                 <div className="mt-4 grid gap-3 md:grid-cols-2">
-                  {resultados.slice(0, mostrar).map((s) => (
+                  {resultados.slice(mostrar * PAGINA, (mostrar + 1) * PAGINA).map((s) => (
                     <TarjetaSena key={s.id_sena} sena={s} fotos={fotos} />
                   ))}
                 </div>
-                {mostrar < resultados.length && (
-                  <Button
-                    variant="outline"
-                    className="mt-4 w-full"
-                    onClick={() => setMostrar(mostrar + PAGINA)}
-                  >
-                    Mostrar más
-                  </Button>
-                )}
+                <Paginador
+                  pagina={mostrar}
+                  total={resultados.length}
+                  porPagina={PAGINA}
+                  onCambiar={setMostrar}
+                />
               </>
             )}
           </>
@@ -231,12 +229,12 @@ export function TarjetaSena({ sena, fotos }: { sena: SenaResumen; fotos: Record<
               key={t + c}
               title={(t === "dom" ? "Mano principal: " : "Mano de apoyo: ") + c}
               className={
-                "grid size-12 place-items-center rounded-md bg-background ring-2 " +
+                "grid size-10 shrink-0 place-items-center rounded-md bg-background ring-2 " +
                 (t === "dom" ? "ring-accent" : "ring-primary")
               }
             >
               {src ? (
-                <img src={src} alt={c} className="h-10 w-10 object-contain" />
+                <img src={src} alt={c} className="h-8 w-8 object-contain" />
               ) : (
                 <b className="text-xs">{c}</b>
               )}
@@ -245,8 +243,8 @@ export function TarjetaSena({ sena, fotos }: { sena: SenaResumen; fotos: Record<
         })}
       </span>
       <span className="min-w-0 flex-1">
-        <strong className="block truncate font-display">{sena.glosa}</strong>
-        <span className="block truncate text-xs text-muted-foreground">
+        <strong className="block font-display leading-tight">{sena.glosa}</strong>
+        <span className="line-clamp-2 text-xs text-muted-foreground">
           {sena.codigo} · {sena.tipo} · {lugares.join(", ")}
         </span>
       </span>
@@ -255,5 +253,58 @@ export function TarjetaSena({ sena, fotos }: { sena: SenaResumen; fotos: Record<
         className="shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1"
       />
     </Link>
+  );
+}
+
+/** Paginación con flechas: ← Página X de Y → */
+export function Paginador({
+  pagina,
+  total,
+  porPagina,
+  onCambiar,
+}: {
+  pagina: number;
+  total: number;
+  porPagina: number;
+  onCambiar: (p: number) => void;
+}) {
+  const paginas = Math.ceil(total / porPagina);
+  if (paginas <= 1) return null;
+  const desde = pagina * porPagina + 1;
+  const hasta = Math.min(total, (pagina + 1) * porPagina);
+  return (
+    <nav
+      aria-label="Páginas de resultados"
+      className="mt-4 flex items-center justify-between gap-3"
+    >
+      <Button
+        variant="outline"
+        size="icon"
+        aria-label="Página anterior"
+        disabled={pagina === 0}
+        onClick={() => onCambiar(pagina - 1)}
+        className="size-11"
+      >
+        <ArrowLeft />
+      </Button>
+      <p className="text-center text-sm text-muted-foreground">
+        <span className="font-medium text-foreground">
+          Página {pagina + 1} de {paginas}
+        </span>
+        <span className="block text-xs tabular-nums">
+          {desde}–{hasta} de {total.toLocaleString("es-MX")}
+        </span>
+      </p>
+      <Button
+        variant="outline"
+        size="icon"
+        aria-label="Página siguiente"
+        disabled={pagina >= paginas - 1}
+        onClick={() => onCambiar(pagina + 1)}
+        className="size-11"
+      >
+        <ArrowRight />
+      </Button>
+    </nav>
   );
 }

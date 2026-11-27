@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, Hand, RotateCcw, ServerCrash } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Avatar3D, NOMBRES_ZONAS, type Marca } from "@/components/corpus/Avatar3D";
+import { Paginador } from "@/components/corpus/BusquedaMetadatos";
 import { Button } from "@/components/ui/button";
 import {
   API_URL,
@@ -33,6 +34,8 @@ export const Route = createFileRoute("/avatar")({
 
 type Manos = "" | "true" | "false";
 
+const POR_PAGINA = 10;
+
 function marcasDe(
   s: { metadatos: SenaResumen["metadatos"] } | null,
 ): Record<string, Marca> | undefined {
@@ -55,6 +58,7 @@ function AvatarView() {
   const [cargando, setCargando] = useState(false);
   const [ficha, setFicha] = useState<SenaFicha | null>(null);
   const [pestana, setPestana] = useState<"buscar" | "resultados">("buscar");
+  const [pagina, setPagina] = useState(0);
 
   useEffect(() => {
     cargarFotos().then(setFotos);
@@ -74,6 +78,7 @@ function AvatarView() {
       .filtrar(mano, zona ?? "", manos)
       .then((r) => {
         setResultados(r);
+        setPagina(0);
         setSinApi(false);
       })
       .catch(() => setSinApi(true))
@@ -326,35 +331,43 @@ function AvatarView() {
                       No hay señas con esa combinación. Prueba quitando algo.
                     </p>
                   )}
-                  <div className="mt-3 grid max-h-[520px] gap-3 overflow-y-auto pr-1 sm:grid-cols-2">
-                    {resultados?.map((s) => (
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    {resultados?.slice(pagina * POR_PAGINA, (pagina + 1) * POR_PAGINA).map((s) => (
                       <button
                         key={s.id_sena}
                         type="button"
                         onClick={() => abrir(s.id_sena)}
-                        className="group flex items-center gap-3 rounded-lg bg-background p-3 text-left ring-1 ring-border transition hover:ring-primary/40"
+                        className="group flex flex-col gap-2 rounded-lg bg-background p-3 text-left ring-1 ring-border transition hover:ring-primary/40"
                       >
-                        <span className="flex shrink-0 gap-1">
+                        <span className="flex items-center gap-1">
                           {(s.metadatos?.presencia.cm_dominante ?? []).slice(0, 2).map((c) => (
                             <ManoChip key={"d" + c} codigo={c} fotos={fotos} tipo="dom" />
                           ))}
                           {(s.metadatos?.presencia.cm_base ?? []).slice(0, 1).map((c) => (
                             <ManoChip key={"b" + c} codigo={c} fotos={fotos} tipo="base" />
                           ))}
+                          <ArrowRight
+                            size={16}
+                            className="ml-auto shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1"
+                          />
                         </span>
-                        <span className="min-w-0 flex-1">
-                          <strong className="block truncate font-display">{s.glosa}</strong>
-                          <span className="block truncate text-xs text-muted-foreground">
-                            {s.codigo} · {s.significado}
-                          </span>
+                        <strong className="font-display leading-tight [overflow-wrap:anywhere]">
+                          {s.glosa}
+                        </strong>
+                        <span className="line-clamp-2 text-xs text-muted-foreground">
+                          {s.codigo} · {s.significado}
                         </span>
-                        <ArrowRight
-                          size={16}
-                          className="shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1"
-                        />
                       </button>
                     ))}
                   </div>
+                  {resultados && (
+                    <Paginador
+                      pagina={pagina}
+                      total={resultados.length}
+                      porPagina={POR_PAGINA}
+                      onCambiar={setPagina}
+                    />
+                  )}
                 </div>
               )}
             </>
@@ -379,12 +392,12 @@ function ManoChip({
     <span
       title={(tipo === "dom" ? "Mano principal: " : "Mano de apoyo: ") + codigo}
       className={
-        "grid size-12 place-items-center rounded-md bg-background ring-2 " +
+        "grid size-10 shrink-0 place-items-center rounded-md bg-background ring-2 " +
         (tipo === "dom" ? "ring-accent" : "ring-primary ring-dashed")
       }
     >
       {src ? (
-        <img src={src} alt={codigo} className="h-10 w-10 object-contain" />
+        <img src={src} alt={codigo} className="h-8 w-8 object-contain" />
       ) : (
         <b className="text-xs">{codigo}</b>
       )}
