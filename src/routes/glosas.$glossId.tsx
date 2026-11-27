@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { GlossDetailView } from "@/components/corpus/CorpusViews";
+export const Route = createFileRoute("/glosas/$glossId")({ head: ({ params }) => ({ meta: [{ title: `${params.glossId} — Corpus LSM` }, { name: "description", content: `Información lingüística y fonológica de la glosa ${params.glossId}.` }, { property: "og:title", content: `${params.glossId} — Corpus LSM` }, { property: "og:description", content: "Detalle estructurado de una glosa del corpus." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }), component: () => <GlossDetailView glossId={Route.useParams().glossId}/> });

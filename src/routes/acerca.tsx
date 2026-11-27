@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { AboutView } from "@/components/corpus/CorpusViews";
+export const Route = createFileRoute("/acerca")({ head: () => ({ meta: [{ title: "Acerca del proyecto — Corpus LSM" }, { name: "description", content: "Conoce el objetivo y alcance del prototipo." }, { property: "og:title", content: "Acerca del proyecto — Corpus LSM" }, { property: "og:description", content: "Una herramienta académica para un corpus estructurado de lengua de señas." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }), component: AboutView });
