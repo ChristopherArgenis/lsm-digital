@@ -147,7 +147,10 @@ function AvatarView() {
       <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
         <section
           aria-label="Avatar"
-          className="overflow-hidden rounded-xl bg-hero text-hero-foreground shadow-sm ring-1 ring-border"
+          className={
+            "overflow-hidden rounded-xl bg-hero text-hero-foreground shadow-sm ring-1 ring-border " +
+            (ficha ? "" : "lg:mt-[68px]")
+          }
         >
           <div className="flex items-center justify-between px-5 pt-4">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-hero-muted">
