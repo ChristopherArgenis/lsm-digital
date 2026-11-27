@@ -35,6 +35,10 @@ export type SenaFicha = SenaResumen & {
 
 export type Opciones = { manos: [string, number][]; zonas: [string, number][] };
 
+export type CampoMetadatos =
+  "tipo" | "cm_dominante" | "cm_base" | "ubicacion_dominante" | "ubicacion_base";
+export type OpcionesMetadatos = Record<CampoMetadatos, [string, number][]>;
+
 async function pedir<T>(ruta: string): Promise<T> {
   const r = await fetch(API_URL + ruta);
   if (!r.ok) throw new Error(`La API respondió ${r.status}`);
@@ -50,6 +54,13 @@ export const api = {
     return pedir<SenaResumen[]>("/api/visual/filtrar?" + p.toString());
   },
   sena: (id: number) => pedir<SenaFicha>(`/api/senas/${id}`),
+  metadatosOpciones: () => pedir<OpcionesMetadatos>("/api/metadatos/opciones"),
+  buscarMetadatos: (criterios: Partial<Record<CampoMetadatos, string>>) => {
+    const p = new URLSearchParams(
+      Object.entries(criterios).filter(([, v]) => v) as [string, string][],
+    );
+    return pedir<SenaResumen[]>("/api/metadatos/buscar?" + p.toString());
+  },
 };
 
 // Fotos de las configuraciones manuales del DLSM (public/manos, 221 archivos).

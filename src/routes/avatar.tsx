@@ -54,6 +54,7 @@ function AvatarView() {
   const [resultados, setResultados] = useState<SenaResumen[] | null>(null);
   const [cargando, setCargando] = useState(false);
   const [ficha, setFicha] = useState<SenaFicha | null>(null);
+  const [pestana, setPestana] = useState<"buscar" | "resultados">("buscar");
 
   useEffect(() => {
     cargarFotos().then(setFotos);
@@ -93,6 +94,7 @@ function AvatarView() {
     setMano("");
     setManos("");
     setFicha(null);
+    setPestana("buscar");
   };
 
   return (
@@ -131,8 +133,8 @@ function AvatarView() {
           <ServerCrash className="shrink-0 text-destructive" size={20} />
           <p>
             No hay conexión con la API en <code className="rounded bg-muted px-1">{API_URL}</code>.
-            Enciende PostgreSQL y arranca la API de LSM_DB con <b>iniciar.bat</b>; luego recarga
-            esta página.
+            Enciende PostgreSQL y arranca el Backend (<b>INICIAR_TODO.bat</b>); luego recarga esta
+            página.
           </p>
         </div>
       )}
@@ -198,124 +200,163 @@ function AvatarView() {
             <Ficha ficha={ficha} fotos={fotos} />
           ) : (
             <>
-              <div className="rounded-xl bg-card p-5 shadow-sm ring-1 ring-border">
-                <p className="section-label">2 · ¿Qué forma tiene la mano?</p>
-                <div
-                  className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6 xl:grid-cols-8"
-                  role="group"
-                  aria-label="Formas de la mano"
-                >
-                  {(opciones?.manos ?? []).map(([m, n]) => {
-                    const src = fotoDe(fotos, m),
-                      on = mano === m;
-                    return (
-                      <button
-                        key={m}
-                        type="button"
-                        aria-pressed={on}
-                        aria-label={`Mano ${m}, ${n} señas`}
-                        onClick={() => setMano(on ? "" : m)}
-                        className={
-                          "flex aspect-square flex-col items-center justify-center gap-0.5 rounded-lg p-1 ring-1 transition " +
-                          (on
-                            ? "bg-accent-soft ring-2 ring-accent"
-                            : "bg-background ring-border hover:ring-primary/40")
-                        }
-                      >
-                        {src ? (
-                          <img src={src} alt="" className="h-12 w-full object-contain" />
-                        ) : (
-                          <Hand size={28} className="text-muted-foreground" />
-                        )}
-                        <span className="font-display text-sm font-semibold leading-none">{m}</span>
-                        <span className="text-[10px] tabular-nums text-muted-foreground">{n}</span>
-                      </button>
-                    );
-                  })}
-                  {!opciones && !sinApi && (
-                    <p className="col-span-full text-sm text-muted-foreground">
-                      Cargando formas de mano…
+              <div role="tablist" aria-label="Búsqueda" className="flex border-b border-border">
+                {(
+                  [
+                    ["buscar", "Buscar"],
+                    ["resultados", resultados ? `Resultados (${resultados.length})` : "Resultados"],
+                  ] as const
+                ).map(([id, t]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    role="tab"
+                    aria-selected={pestana === id}
+                    onClick={() => setPestana(id)}
+                    className={
+                      "-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors " +
+                      (pestana === id
+                        ? "border-primary text-primary"
+                        : "border-transparent text-muted-foreground hover:text-foreground")
+                    }
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+              {pestana === "buscar" ? (
+                <>
+                  <div className="rounded-xl bg-card p-5 shadow-sm ring-1 ring-border">
+                    <p className="section-label">2 · ¿Qué forma tiene la mano?</p>
+                    <div
+                      className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6 xl:grid-cols-8"
+                      role="group"
+                      aria-label="Formas de la mano"
+                    >
+                      {(opciones?.manos ?? []).map(([m, n]) => {
+                        const src = fotoDe(fotos, m),
+                          on = mano === m;
+                        return (
+                          <button
+                            key={m}
+                            type="button"
+                            aria-pressed={on}
+                            aria-label={`Mano ${m}, ${n} señas`}
+                            onClick={() => setMano(on ? "" : m)}
+                            className={
+                              "flex aspect-square flex-col items-center justify-center gap-0.5 rounded-lg p-1 ring-1 transition " +
+                              (on
+                                ? "bg-accent-soft ring-2 ring-accent"
+                                : "bg-background ring-border hover:ring-primary/40")
+                            }
+                          >
+                            {src ? (
+                              <img src={src} alt="" className="h-12 w-full object-contain" />
+                            ) : (
+                              <Hand size={28} className="text-muted-foreground" />
+                            )}
+                            <span className="font-display text-sm font-semibold leading-none">
+                              {m}
+                            </span>
+                            <span className="text-[10px] tabular-nums text-muted-foreground">
+                              {n}
+                            </span>
+                          </button>
+                        );
+                      })}
+                      {!opciones && !sinApi && (
+                        <p className="col-span-full text-sm text-muted-foreground">
+                          Cargando formas de mano…
+                        </p>
+                      )}
+                    </div>
+                    <p className="section-label mt-5">3 · ¿Cuántas manos?</p>
+                    <div className="mt-2 flex gap-2">
+                      {(
+                        [
+                          ["", "Cualquiera"],
+                          ["false", "Una mano"],
+                          ["true", "Dos manos"],
+                        ] as const
+                      ).map(([v, t]) => (
+                        <Button
+                          key={v}
+                          variant={manos === v ? "default" : "outline"}
+                          size="sm"
+                          aria-pressed={manos === v}
+                          onClick={() => setManos(v)}
+                        >
+                          {t}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between gap-3 rounded-xl bg-card p-4 shadow-sm ring-1 ring-border">
+                    <p className="text-sm text-muted-foreground">
+                      {cargando
+                        ? "Buscando…"
+                        : resultados
+                          ? `${resultados.length} ${resultados.length === 1 ? "seña encontrada" : "señas encontradas"}`
+                          : "Toca una zona del avatar o elige una forma de mano."}
+                    </p>
+                    <Button disabled={!resultados?.length} onClick={() => setPestana("resultados")}>
+                      Ver resultados
+                      <ArrowRight />
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <div className="rounded-xl bg-card p-4 shadow-sm ring-1 ring-border">
+                  <p className="text-xs text-muted-foreground">
+                    {[
+                      mano && `Mano ${mano}`,
+                      zona && `en ${zona}`,
+                      manos && (manos === "true" ? "dos manos" : "una mano"),
+                    ]
+                      .filter(Boolean)
+                      .join(" · ") || "Sin filtros"}
+                  </p>
+                  {!resultados && (
+                    <p className="mt-3 rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
+                      Toca una zona del avatar o elige una forma de mano para empezar.
                     </p>
                   )}
-                </div>
-                <p className="section-label mt-5">3 · ¿Cuántas manos?</p>
-                <div className="mt-2 flex gap-2">
-                  {(
-                    [
-                      ["", "Cualquiera"],
-                      ["false", "Una mano"],
-                      ["true", "Dos manos"],
-                    ] as const
-                  ).map(([v, t]) => (
-                    <Button
-                      key={v}
-                      variant={manos === v ? "default" : "outline"}
-                      size="sm"
-                      aria-pressed={manos === v}
-                      onClick={() => setManos(v)}
-                    >
-                      {t}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-baseline justify-between">
-                  <h2 className="font-display text-xl font-semibold">Señas encontradas</h2>
-                  {resultados && (
-                    <span className="text-xs tabular-nums text-muted-foreground">
-                      {resultados.length} {resultados.length === 1 ? "seña" : "señas"}
-                    </span>
+                  {resultados && resultados.length === 0 && (
+                    <p className="mt-3 rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
+                      No hay señas con esa combinación. Prueba quitando algo.
+                    </p>
                   )}
-                </div>
-                {!resultados && (
-                  <p className="mt-3 rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
-                    Toca una zona del avatar o elige una forma de mano para empezar.
-                  </p>
-                )}
-                {cargando && <p className="mt-3 text-sm text-muted-foreground">Buscando…</p>}
-                {resultados && resultados.length === 0 && (
-                  <p className="mt-3 rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
-                    No hay señas con esa combinación. Prueba quitando algo.
-                  </p>
-                )}
-                <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  {resultados?.slice(0, 60).map((s) => (
-                    <button
-                      key={s.id_sena}
-                      type="button"
-                      onClick={() => abrir(s.id_sena)}
-                      className="group flex items-center gap-3 rounded-lg bg-card p-3 text-left shadow-sm ring-1 ring-border transition hover:ring-primary/40"
-                    >
-                      <span className="flex shrink-0 gap-1">
-                        {(s.metadatos?.presencia.cm_dominante ?? []).slice(0, 2).map((c) => (
-                          <ManoChip key={"d" + c} codigo={c} fotos={fotos} tipo="dom" />
-                        ))}
-                        {(s.metadatos?.presencia.cm_base ?? []).slice(0, 1).map((c) => (
-                          <ManoChip key={"b" + c} codigo={c} fotos={fotos} tipo="base" />
-                        ))}
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <strong className="block truncate font-display">{s.glosa}</strong>
-                        <span className="block truncate text-xs text-muted-foreground">
-                          {s.codigo} · {s.significado}
+                  <div className="mt-3 grid max-h-[520px] gap-3 overflow-y-auto pr-1 sm:grid-cols-2">
+                    {resultados?.map((s) => (
+                      <button
+                        key={s.id_sena}
+                        type="button"
+                        onClick={() => abrir(s.id_sena)}
+                        className="group flex items-center gap-3 rounded-lg bg-background p-3 text-left ring-1 ring-border transition hover:ring-primary/40"
+                      >
+                        <span className="flex shrink-0 gap-1">
+                          {(s.metadatos?.presencia.cm_dominante ?? []).slice(0, 2).map((c) => (
+                            <ManoChip key={"d" + c} codigo={c} fotos={fotos} tipo="dom" />
+                          ))}
+                          {(s.metadatos?.presencia.cm_base ?? []).slice(0, 1).map((c) => (
+                            <ManoChip key={"b" + c} codigo={c} fotos={fotos} tipo="base" />
+                          ))}
                         </span>
-                      </span>
-                      <ArrowRight
-                        size={16}
-                        className="shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1"
-                      />
-                    </button>
-                  ))}
+                        <span className="min-w-0 flex-1">
+                          <strong className="block truncate font-display">{s.glosa}</strong>
+                          <span className="block truncate text-xs text-muted-foreground">
+                            {s.codigo} · {s.significado}
+                          </span>
+                        </span>
+                        <ArrowRight
+                          size={16}
+                          className="shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1"
+                        />
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                {resultados && resultados.length > 60 && (
-                  <p className="mt-3 text-xs text-muted-foreground">
-                    Se muestran 60 de {resultados.length}. Elige otra forma de mano o zona para
-                    acotar.
-                  </p>
-                )}
-              </div>
+              )}
             </>
           )}
         </section>
