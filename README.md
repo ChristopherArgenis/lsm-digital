@@ -550,3 +550,14 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+## Sección Avatar (búsqueda visual en 3D)
+
+Ruta `/avatar`. Un avatar 3D (Three.js) donde se toca el lugar del cuerpo en que se hace la seña, se elige la forma de la mano (con las fotos de las configuraciones manuales del DLSM, en `public/manos/`) y se indica si es con una o dos manos. Al abrir una seña, el avatar marca dónde se hace (naranja: mano principal; azul: mano de apoyo) y la ficha muestra las configuraciones exactas.
+
+Los datos vienen de la API de [LSM_DB](https://github.com/ChristopherArgenis/LSM_DB) (carpeta `api/`, FastAPI + PostgreSQL). Para usarla:
+
+1. Enciende PostgreSQL y arranca la API de LSM_DB (`iniciar.bat`); queda en `http://localhost:8000`.
+2. En este proyecto: `npm install` y `npm run dev`, y abre `/avatar`.
+
+Si la API está en otra dirección, crea un archivo `.env` con `VITE_LSM_API_URL=http://otra-direccion:puerto`.

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AcercaRouteImport } from './routes/acerca'
+import { Route as AvatarRouteImport } from './routes/avatar'
 import { Route as BuscarRouteImport } from './routes/buscar'
 import { Route as BusquedaFonologicaRouteImport } from './routes/busqueda-fonologica'
 import { Route as GlosasRouteImport } from './routes/glosas'
@@ -26,6 +27,11 @@ const IndexRoute = IndexRouteImport.update({
 const AcercaRoute = AcercaRouteImport.update({
   id: '/acerca',
   path: '/acerca',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AvatarRoute = AvatarRouteImport.update({
+  id: '/avatar',
+  path: '/avatar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BuscarRoute = BuscarRouteImport.update({
@@ -62,6 +68,7 @@ const GlosasGlossIdRoute = GlosasGlossIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/acerca': typeof AcercaRoute
+  '/avatar': typeof AvatarRoute
   '/buscar': typeof BuscarRoute
   '/busqueda-fonologica': typeof BusquedaFonologicaRoute
   '/glosas': typeof GlosasRouteWithChildren
@@ -72,6 +79,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/acerca': typeof AcercaRoute
+  '/avatar': typeof AvatarRoute
   '/buscar': typeof BuscarRoute
   '/busqueda-fonologica': typeof BusquedaFonologicaRoute
   '/historial': typeof HistorialRoute
@@ -82,6 +90,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/acerca': typeof AcercaRoute
+  '/avatar': typeof AvatarRoute
   '/buscar': typeof BuscarRoute
   '/busqueda-fonologica': typeof BusquedaFonologicaRoute
   '/glosas': typeof GlosasRouteWithChildren
@@ -94,6 +103,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/acerca'
+    | '/avatar'
     | '/buscar'
     | '/busqueda-fonologica'
     | '/glosas'
@@ -104,6 +114,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/acerca'
+    | '/avatar'
     | '/buscar'
     | '/busqueda-fonologica'
     | '/historial'
@@ -113,6 +124,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/acerca'
+    | '/avatar'
     | '/buscar'
     | '/busqueda-fonologica'
     | '/glosas'
@@ -124,6 +136,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AcercaRoute: typeof AcercaRoute
+  AvatarRoute: typeof AvatarRoute
   BuscarRoute: typeof BuscarRoute
   BusquedaFonologicaRoute: typeof BusquedaFonologicaRoute
   GlosasRoute: typeof GlosasRouteWithChildren
@@ -144,6 +157,13 @@ declare module '@tanstack/react-router' {
       path: '/acerca'
       fullPath: '/acerca'
       preLoaderRoute: typeof AcercaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/avatar': {
+      id: '/avatar'
+      path: '/avatar'
+      fullPath: '/avatar'
+      preLoaderRoute: typeof AvatarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/buscar': {
@@ -207,6 +227,7 @@ const GlosasRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcercaRoute: AcercaRoute,
+  AvatarRoute: AvatarRoute,
   BuscarRoute: BuscarRoute,
   BusquedaFonologicaRoute: BusquedaFonologicaRoute,
   GlosasRoute: GlosasRouteWithChildren,
