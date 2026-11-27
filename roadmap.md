@@ -12,4 +12,4 @@
 - [x] Add video analysis demonstration and phonological relationships
 - [x] Verify responsive navigation and core journeys
 ## Entrega
-- [ ] Subir el código a un repositorio de GitHub (el usuario autoriza su cuenta y yo creo el repo y subo los archivos)
+- [x] Subir el código a un repositorio de GitHub (ChristopherArgenis/lsm-digital, 92 archivos)
